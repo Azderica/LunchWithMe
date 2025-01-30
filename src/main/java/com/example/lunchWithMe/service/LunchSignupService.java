@@ -1,6 +1,6 @@
-package com.demo.lunchWithMe.service;
+package com.example.lunchWithMe.service;
 
-import com.demo.lunchWithMe.model.LunchSignup;
+import com.example.lunchWithMe.model.LunchSignup;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.demo.lunchWithMe;
+package com.example.lunchWithMe;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

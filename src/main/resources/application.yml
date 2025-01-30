@@ -1,0 +1,24 @@
+server:
+  port: 8080  # 메인 애플리케이션 포트
+
+spring:
+  application:
+    name: lunch-service
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+# Swagger UI 설정
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI 경로
+    enabled: true
+  api-docs:
+    path: /api-docs
+  packages-to-scan: com.example.lunchWithMe.controller

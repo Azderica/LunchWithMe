@@ -1,4 +1,4 @@
-package com.demo.lunchWithMe.model;
+package com.example.lunchWithMe.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class LunchSignup {
 
     private String userId;
