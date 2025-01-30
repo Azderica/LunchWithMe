@@ -1,18 +1,20 @@
 package com.example.lunchWithMe.controller;
 
+import com.example.lunchWithMe.config.PathConstant;
 import com.example.lunchWithMe.service.LunchSignupService;
 import com.example.lunchWithMe.model.LunchSignup;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@Tag(name = "Lunch", description = "점심 신청 API")
+@RequestMapping(PathConstant.PATH_LUNCH)
 public class LunchController {
 
     private final LunchSignupService lunchSignupService;
@@ -21,39 +23,67 @@ public class LunchController {
         this.lunchSignupService = lunchSignupService;
     }
 
-    @GetMapping("/")
-    @Operation(summary = "신청 폼 표시", description = "점심 신청 폼을 표시합니다.")
-    public String showSignupForm(Model model) {
+    @GetMapping
+    public String lunchPage(Model model, HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return PathConstant.REDIRECT_LOGIN;
+        }
+
         model.addAttribute("isSignupTime", lunchSignupService.isSignupTime());
-        model.addAttribute("signups", lunchSignupService.getAllSignups());
-        return "lunch-signup";
+        model.addAttribute("allSignups", lunchSignupService.getAllSignups());
+
+        LunchSignup mySignup = lunchSignupService.getSignupByUserId(userId);
+        model.addAttribute("hasSignup", mySignup != null);
+        model.addAttribute("mySignup", mySignup);
+
+        return PathConstant.VIEW_LUNCH_MAIN;
     }
 
-    @PostMapping("/submit-lunch")
-    @ResponseBody
-    @Operation(summary = "점심 신청", description = "점심 메뉴를 신청합니다.")
-    public String submitLunch(
-            @Parameter(description = "사용자 ID") @RequestParam String userId,
-            @Parameter(description = "메뉴") @RequestParam String menu) {
+    @PostMapping("/submit")
+    public String submitLunch(@RequestParam String menu,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return PathConstant.REDIRECT_LOGIN;
+        }
+
         if (!lunchSignupService.isSignupTime()) {
-            return "<p class='text-danger'>신청 시간이 아닙니다 (09:00 ~ 11:00)</p>";
+            redirectAttributes.addFlashAttribute("error", "신청 가능 시간이 아닙니다.");
+            return PathConstant.REDIRECT_LUNCH;
         }
 
-        boolean success = lunchSignupService.addSignup(userId, menu);
-        if (success) {
-            return "<p class='text-success'>" + userId +
-                    "님의 점심 신청이 완료되었습니다.<br>선택하신 메뉴: " +
-                    menu + "</p>";
-        } else {
-            return "<p class='text-danger'>신청에 실패했습니다.</p>";
+        if (lunchSignupService.getSignupByUserId(userId) != null) {
+            redirectAttributes.addFlashAttribute("error", "이미 신청하셨습니다.");
+            return PathConstant.REDIRECT_LUNCH;
         }
+
+        lunchSignupService.addSignup(userId, menu);
+        redirectAttributes.addFlashAttribute("success", "신청이 완료되었습니다.");
+        return PathConstant.REDIRECT_LUNCH;
     }
 
-    // REST API 엔드포인트 추가
-    @GetMapping("/api/signups")
-    @ResponseBody
-    @Operation(summary = "신청 목록 조회", description = "전체 점심 신청 목록을 조회합니다.")
-    public List<LunchSignup> getSignups() {
-        return lunchSignupService.getAllSignups();
+    @PostMapping("/cancel")
+    public String cancelSignup(HttpSession session,
+                               RedirectAttributes redirectAttributes) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return PathConstant.REDIRECT_LOGIN;
+        }
+
+        if (!lunchSignupService.isSignupTime()) {
+            redirectAttributes.addFlashAttribute("error", "취소 가능 시간이 아닙니다.");
+            return PathConstant.REDIRECT_LUNCH;
+        }
+
+        if (lunchSignupService.getSignupByUserId(userId) == null) {
+            redirectAttributes.addFlashAttribute("error", "신청 내역이 없습니다.");
+            return PathConstant.REDIRECT_LUNCH;
+        }
+
+        lunchSignupService.cancelSignup(userId);
+        redirectAttributes.addFlashAttribute("success", "신청이 취소되었습니다.");
+        return PathConstant.REDIRECT_LUNCH;
     }
 }

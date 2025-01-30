@@ -5,9 +5,11 @@ spring:
   application:
     name: lunch-service
   thymeleaf:
-    cache: false
     prefix: classpath:/templates/
     suffix: .html
+    cache: false
+    mode: HTML
+    encoding: UTF-8
   devtools:
     restart:
       enabled: true
