@@ -8,59 +8,59 @@
 </head>
 <body>
 <div class="container mt-5">
+    <!-- 상단 바 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>점심 신청 시스템</h2>
         <div>
             <span th:text="${session.userId + '님 환영합니다'}" class="me-3"></span>
-            <a href="/logout" class="btn btn-secondary">로그아웃</a>
+            <a th:href="@{/logout}" class="btn btn-secondary">로그아웃</a>
         </div>
     </div>
 
-    <!-- 신청 여부에 따른 다른 화면 표시 -->
-    <div th:if="${hasSignup}">
-        <!-- 이미 신청한 경우 -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h4>나의 신청 내역</h4>
-            </div>
-            <div class="card-body">
+    <!-- 알림 메시지 -->
+    <div id="message-area">
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    </div>
+
+    <!-- 신청 폼 또는 신청 내역 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 th:text="${hasSignup ? '나의 신청 내역' : '점심 신청하기'}"></h4>
+        </div>
+        <div class="card-body">
+            <!-- 신청 내역 -->
+            <div th:if="${hasSignup}">
                 <p>메뉴: <span th:text="${mySignup.menu}"></span></p>
                 <p>신청 시간: <span th:text="${#temporals.format(mySignup.signupTime, 'HH:mm')}"></span></p>
-                <form th:action="@{/cancel-signup}" method="post"
-                      th:if="${isSignupTime}"
-                      hx-post="/cancel-signup"
-                      hx-target="#main-content">
+                <form th:if="${isSignupTime}"
+                      th:action="@{/lunch/cancel}"
+                      method="post"
+                      hx-post="@{/lunch/cancel}"
+                      hx-target="#main-content"
+                      hx-swap="outerHTML">
                     <button type="submit" class="btn btn-danger">신청 취소</button>
                 </form>
             </div>
-        </div>
-    </div>
 
-    <div th:unless="${hasSignup}" th:if="${isSignupTime}">
-        <!-- 신청하지 않은 경우 -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h4>점심 신청하기</h4>
-            </div>
-            <div class="card-body">
-                <form hx-post="/submit-lunch"
-                      hx-target="#main-content">
+            <!-- 신청 폼 -->
+            <div th:unless="${hasSignup}" th:if="${isSignupTime}" id="signup-form">
+                <form hx-post="@{/lunch/submit}"
+                      hx-target="#main-content"
+                      hx-swap="outerHTML">
                     <div class="mb-3">
                         <label for="menu" class="form-label">희망 메뉴:</label>
-                        <input type="text"
-                               class="form-control"
-                               id="menu"
-                               name="menu"
-                               required>
+                        <input type="text" class="form-control" id="menu" name="menu" required>
                     </div>
                     <button type="submit" class="btn btn-primary">신청하기</button>
                 </form>
             </div>
-        </div>
-    </div>
 
-    <div th:unless="${isSignupTime}" class="alert alert-warning">
-        신청 가능 시간이 아닙니다. (신청 시간: 09:00 ~ 11:00)
+            <!-- 신청 시간 외 메시지 -->
+            <div th:unless="${isSignupTime}" class="alert alert-warning">
+                신청 가능 시간이 아닙니다. (신청 시간: 07:00 ~ 11:00)
+            </div>
+        </div>
     </div>
 
     <!-- 전체 신청 현황 -->

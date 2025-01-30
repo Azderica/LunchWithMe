@@ -1,6 +1,7 @@
 package com.example.lunchWithMe.service;
 
 import com.example.lunchWithMe.model.LunchSignup;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +13,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 public class LunchSignupService {
     private final Map<String, LunchSignup> signupCache = new ConcurrentHashMap<>();
 
     public boolean isSignupTime() {
         LocalTime now = LocalTime.now();
-//        return now.isAfter(LocalTime.of(9, 0))
+//        return now.isAfter(LocalTime.of(7, 0))
 //                && now.isBefore(LocalTime.of(11, 0));
         return true;
     }

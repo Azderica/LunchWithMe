@@ -3,8 +3,8 @@ package com.example.lunchWithMe.controller;
 import com.example.lunchWithMe.config.PathConstant;
 import com.example.lunchWithMe.service.LunchSignupService;
 import com.example.lunchWithMe.model.LunchSignup;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,14 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+@RequiredArgsConstructor
 @RequestMapping(PathConstant.PATH_LUNCH)
 public class LunchController {
 
     private final LunchSignupService lunchSignupService;
-
-    public LunchController(LunchSignupService lunchSignupService) {
-        this.lunchSignupService = lunchSignupService;
-    }
 
     @GetMapping
     public String lunchPage(Model model, HttpSession session) {
@@ -43,6 +40,7 @@ public class LunchController {
     @PostMapping("/submit")
     public String submitLunch(@RequestParam String menu,
                               HttpSession session,
+                              Model model,
                               RedirectAttributes redirectAttributes) {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
@@ -61,11 +59,14 @@ public class LunchController {
 
         lunchSignupService.addSignup(userId, menu);
         redirectAttributes.addFlashAttribute("success", "신청이 완료되었습니다.");
+
+        updateModel(model, userId);
         return PathConstant.REDIRECT_LUNCH;
     }
 
     @PostMapping("/cancel")
     public String cancelSignup(HttpSession session,
+                               Model model,
                                RedirectAttributes redirectAttributes) {
         String userId = (String) session.getAttribute("userId");
         if (userId == null) {
@@ -84,6 +85,17 @@ public class LunchController {
 
         lunchSignupService.cancelSignup(userId);
         redirectAttributes.addFlashAttribute("success", "신청이 취소되었습니다.");
+
+        updateModel(model, userId);
         return PathConstant.REDIRECT_LUNCH;
+    }
+
+    private void updateModel(Model model, String userId) {
+        model.addAttribute("isSignupTime", lunchSignupService.isSignupTime());
+        model.addAttribute("allSignups", lunchSignupService.getAllSignups());
+
+        LunchSignup mySignup = lunchSignupService.getSignupByUserId(userId);
+        model.addAttribute("hasSignup", mySignup != null);
+        model.addAttribute("mySignup", mySignup);
     }
 }

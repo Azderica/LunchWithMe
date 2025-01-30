@@ -2,6 +2,10 @@ server:
   port: 8080  # 메인 애플리케이션 포트
 
 spring:
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
   application:
     name: lunch-service
   thymeleaf:

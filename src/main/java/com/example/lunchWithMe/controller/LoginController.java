@@ -4,6 +4,7 @@ package com.example.lunchWithMe.controller;
 import com.example.lunchWithMe.config.PathConstant;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping
+@RequiredArgsConstructor
 public class LoginController {
 
     @GetMapping(PathConstant.PATH_ROOT)
